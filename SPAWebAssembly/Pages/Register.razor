@@ -1,0 +1,56 @@
+﻿@page "/register"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@code {
+    private RegisterModel registerModel = new();
+    private string errorMessage;
+
+    private async Task RegisterUser()
+    {
+        if (registerModel.password != registerModel.confirmPassword)
+        {
+            errorMessage = "Passwords do not match!";
+            return;
+        }
+
+        var response = await Http.PostAsJsonAsync("api/register", registerModel);
+        if (response.IsSuccessStatusCode)
+        {
+            // Redirect to login
+            NavigationManager.NavigateTo("/login");
+        }
+        else
+        {
+            errorMessage = "Registration failed.";
+        }
+    }
+}
+
+<h3>Register</h3>
+
+<EditForm Model="registerModel" OnValidSubmit="RegisterUser">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <InputText id="username" @bind-Value="registerModel.username" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <InputText type="password" id="password" @bind-Value="registerModel.password" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="confirmPassword">Confirm Password:</label>
+        <InputText type="password" id="confirmPassword" @bind-Value="registerModel.confirmPassword" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="text-danger">@errorMessage</p>
+    }
+</EditForm>
